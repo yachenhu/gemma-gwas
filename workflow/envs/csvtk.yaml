@@ -1,0 +1,4 @@
+channels:
+  - conda-forge
+dependencies:
+  - csvtk=0.35.0

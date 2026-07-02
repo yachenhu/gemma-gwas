@@ -1,0 +1,39 @@
+vcf: /titan/projects/associations/f3-crossbred-lav/basevar-stitch-genotype-imputation/results/merged/calls.filtered.vcf.gz
+metadata: data/metadata.tsv
+chr_subset: "1"  # chromosome(s) to include, e.g. "1", "1-5", or "" for all
+  
+ref:
+  release: 115
+  species: gallus_gallus
+  build: bGalGal1.mat.broiler.GRCg7b
+  annotation: ncbi  # ensembl or ncbi
+  ncbi_gtf_url: "https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/016/699/485/GCF_016699485.2_bGalGal1.mat.broiler.GRCg7b/GCF_016699485.2_bGalGal1.mat.broiler.GRCg7b_genomic.gtf.gz"
+
+trait: feather_color
+covariates:
+  enabled: true
+  columns: ["strain", "sex"]
+pcs:
+  enabled: false
+  count: 3
+
+params:
+  filter:
+    enabled: true
+    preset: "standard"       # relaxed, standard, strict, or custom
+    custom: ""                # bcftools expression when preset is "custom"
+    # Presets (MAF and F_MISSING computed by bcftools on the fly):
+    #   relaxed:  INFO_SCORE >= 0.6 && MAF >= 0.05 && HWE >= 1e-6 && F_MISSING <= 0.1
+    #   standard: INFO_SCORE >= 0.8 && MAF >= 0.05 && HWE >= 1e-6 && F_MISSING <= 0.1
+    #   strict:   INFO_SCORE >= 0.9 && MAF >= 0.05 && HWE >= 1e-4 && F_MISSING <= 0.1
+  plink: "--allow-extra-chr --chr-set 95"
+  gemma:
+    grm: "-gk 1"
+    lmm: "-lmm 1"
+  susie:
+    enabled: true
+    n_loci: 5
+    window_kb: 250
+    L: 5
+  haplotype:
+    enabled: true

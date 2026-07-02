@@ -1,0 +1,10 @@
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - python=3.12
+  - plink=1.90b7.7
+  - r-susier
+  - pip
+  - pip:
+    - gwaslab==3.6.9

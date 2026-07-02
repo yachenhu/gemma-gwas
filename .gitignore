@@ -1,0 +1,11 @@
+.snakemake/
+results/
+logs/
+benchmarks/
+resources/
+data/*.vcf.gz
+__pycache__/
+*.pyc
+data/
+tests/
+.vscode/
