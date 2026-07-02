@@ -1,9 +1,9 @@
 vcf: /titan/projects/associations/f3-crossbred-lav/basevar-stitch-genotype-imputation/results/merged/calls.filtered.vcf.gz
 metadata: data/metadata.tsv
-chr_subset: "1"  # chromosome(s) to include, e.g. "1", "1-5", or "" for all
+chr_subset: ""  # chromosome(s) to include, e.g. "1", "1-5", or "" for all
   
 ref:
-  release: 115
+  release: 113
   species: gallus_gallus
   build: bGalGal1.mat.broiler.GRCg7b
   annotation: ncbi  # ensembl or ncbi
@@ -37,3 +37,32 @@ params:
     L: 5
   haplotype:
     enabled: true
+  vep:
+    plugins: []
+    extra: ""
+  bcftools:
+    splitvep:
+      attributes:
+        - Consequence
+        - IMPACT
+        - SYMBOL
+        - Gene
+        - Feature_type
+        - Feature
+        - BIOTYPE
+        - EXON
+        - INTRON
+        - HGVSc
+        - HGVSp
+        - cDNA_position
+        - CDS_position
+        - Protein_position
+        - Amino_acids
+        - Codons
+        - Existing_variation
+        - DISTANCE
+        - STRAND
+        - FLAGS
+        - SYMBOL_SOURCE
+        - HGNC_ID
+      extra: ""

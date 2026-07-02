@@ -7,7 +7,9 @@ if config["params"]["susie"]["enabled"]:
             bim="results/processed/genotypes.bim",
             fam="results/processed/genotypes.fam",
         output:
-            touch("results/finemapping/.done"),
+            pipcs="results/finemapping/all_pipcs.csv",
+            causal="results/finemapping/causal_snps.txt",
+            done=touch("results/finemapping/.done"),
         params:
             n=449,
             window=config["params"]["susie"]["window_kb"],

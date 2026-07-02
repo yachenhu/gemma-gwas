@@ -9,10 +9,12 @@ rule all:
         "results/finemapping/.done",
         "results/haplotype/causal_ld_heatmap.png",
         "results/haplotype/genotype_effect.png",
+        "results/annotated/causal.vep.tsv",
 
 include: "rules/ref.smk"
 include: "rules/processing.smk"
 include: "rules/statistics.smk"
 include: "rules/plotting.smk"
 include: "rules/finemapping.smk"
+include: "rules/annotation.smk"
 include: "rules/haplotype.smk"

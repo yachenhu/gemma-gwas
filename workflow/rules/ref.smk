@@ -98,4 +98,30 @@ rule tabix_known_variants:
     cache: True
     wrapper:
         "v4.3.0/bio/tabix/index"
+
+
+rule get_vep_cache:
+    output:
+        directory("resources/vep/cache"),
+    params:
+        species=config["ref"]["species"],
+        build=config["ref"]["build"],
+        release=config["ref"]["release"],
+    log:
+        "logs/vep/cache.log",
+    cache: True
+    wrapper:
+        "v7.2.0/bio/vep/cache"
+
+
+rule get_vep_plugins:
+    output:
+        directory("resources/vep/plugins"),
+    params:
+        release=config["ref"]["release"],
+    log:
+        "logs/vep/plugins.log",
+    cache: True
+    wrapper:
+        "v7.2.0/bio/vep/plugins"
     

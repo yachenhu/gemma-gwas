@@ -10,10 +10,20 @@ from matplotlib.patches import Patch
 
 out_dir = sys.argv[1]
 bfile   = sys.argv[2]  # PLINK bfile for full region
-snps_file = "results/finemapping/causal_snps.txt"
-plink   = sys.argv[3]
+snps_file = sys.argv[3]
+plink   = sys.argv[4]
 
 os.makedirs(out_dir, exist_ok=True)
+
+if os.path.getsize(snps_file) == 0:
+    print("No causal SNPs found — skipping haplotype analysis.")
+    for fname in ["causal_ld_heatmap.png", "genotype_effect.png"]:
+        fig, ax = plt.subplots(figsize=(8, 6))
+        ax.text(0.5, 0.5, "No causal SNPs (PIP > 0.01) identified",
+                ha='center', va='center', fontsize=14, transform=ax.transAxes)
+        fig.savefig(os.path.join(out_dir, fname), dpi=150, facecolor='white', bbox_inches='tight')
+        plt.close()
+    sys.exit(0)
 
 # ---- 1. Load genotype data for causal SNPs ----
 # Extract genotypes in recoded format (0/1/2)
@@ -145,19 +155,30 @@ for _, r in gwas.iterrows():
 
 # ---- 7. Combined haplotype analysis (top multi-SNP combinations) ----
 print("\n=== Multi-SNP Genotype Combinations (proxy haplotypes) ===")
-# Group SNPs by locus
-locus1_snps = ['rs739868845', 'rs316997574']
-locus2_snps = ['rs738777018', 'rs13621884', 'rs738254049', 'rs314954851', 'rs741491580']
-locus3_snps = ['rs3384361296', 'rs732994206', 'rs317785855']
-locus4_snps = ['rs313825228', 'rs312833777', 'rs80763429']
+# Dynamically group causal SNPs into loci by position proximity (250 kb window)
+gwas_causal = gwas[gwas['rs'].isin(snp_names)].sort_values('ps')
+loci = {}
+window_bp = 250_000
+for _, row in gwas_causal.iterrows():
+    pos = row['ps']
+    placed = False
+    for name, (locus_chr, locus_start, locus_end, snps) in loci.items():
+        if abs(pos - locus_start) < window_bp or abs(pos - locus_end) < window_bp:
+            loci[name] = (locus_chr, min(locus_start, pos), max(locus_end, pos), snps + [row['rs']])
+            placed = True
+            break
+    if not placed:
+        loc_name = f"Locus_{len(loci)+1}_{pos/1e6:.2f}Mb"
+        loci[loc_name] = (row['chr'], pos, pos, [row['rs']])
 
-loci = {'Locus1_4.58Mb': locus1_snps, 'Locus2_4.88Mb': locus2_snps,
-        'Locus3_5.43Mb': locus3_snps, 'Locus4_5.69Mb': locus4_snps}
-
-for loc_name, loc_snps in loci.items():
-    print(f"\n  --- {loc_name} ---")
-    # Create combined genotype string for this locus
-    loc_geno = geno_clean[loc_snps].fillna(1).astype(int)  # fill missing with het
+for loc_name, (chrom, start, end, loc_snps) in loci.items():
+    if len(loc_snps) < 2:
+        continue
+    valid = [s for s in loc_snps if s in geno_clean.columns]
+    if len(valid) < 2:
+        continue
+    print(f"\n  --- {loc_name} ({len(valid)} SNPs, chr{chrom}:{start}-{end}) ---")
+    loc_geno = geno_clean[valid].fillna(1).astype(int)
     combo = loc_geno.apply(lambda row: ''.join(row.astype(str)), axis=1)
     counts = combo.value_counts()
 

@@ -78,6 +78,7 @@ for i, lead in enumerate(leads):
         sp.run([plink, "--bfile", bfile, "--chr", chrom,
                 "--from-bp", str(start), "--to-bp", str(end),
                 "--extract", snp_file, "--r2", "square",
+                "--allow-extra-chr", "--chr-set", "95",
                 "--keep-allele-order", "--out", f"{out_dir}/{name}"],
                stdout=sp.DEVNULL, stderr=sp.DEVNULL)
 
@@ -161,15 +162,27 @@ if (nrow(result) > 0) {{
             os.remove(f)
 
 # ---- Save combined results ----
+out_csv = os.path.join(out_dir, "all_pipcs.csv")
+snp_file = os.path.join(out_dir, "causal_snps.txt")
 if all_pips:
     combined = pd.concat(all_pips, ignore_index=True)
-    out_csv = os.path.join(out_dir, "all_pipcs.csv")
     combined.to_csv(out_csv, index=False)
     print(f"\nResults: {len(combined)} variants, saved to {out_csv}")
     top = combined[combined['variable_prob'] > 0.01].sort_values('variable_prob', ascending=False)
     if len(top) > 0:
         print("High-confidence causal variants (PIP>0.01):")
+        causal_snps = []
         for _, r in top.iterrows():
             print(f"  {r['SNPID']:20s} {r.get('LOCUS',''):30s} PIP={r['variable_prob']:.4f}  CS={r['cs']}")
+            causal_snps.append(r['SNPID'])
+        with open(snp_file, 'w') as f:
+            f.write('\n'.join(causal_snps) + '\n')
+        print(f"  Causal SNP list saved to {snp_file}")
+    else:
+        with open(snp_file, 'w') as f:
+            f.write('')
 else:
     print("No results generated.")
+    pd.DataFrame(columns=['variable','SNPID','variable_prob','cs','LOCUS']).to_csv(out_csv, index=False)
+    with open(snp_file, 'w') as f:
+        f.write('')
